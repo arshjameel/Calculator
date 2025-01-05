@@ -1,5 +1,4 @@
 # Calculator
-A simple 4-function calculator made to perform basic arithmetic.
 
 ## Description
 A simple 4-function calculator made to perform basic arithmetic, such as addition, subtraction, multiplication, and dvision.
