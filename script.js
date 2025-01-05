@@ -12,163 +12,132 @@ let isOperation = true;
 
 const mathOperations = ['/', '*', '-', '+', '^'];
 
-keypad.addEventListener('click', (e) => {
-    const buttonValue = e.target.textContent.trim();
-    
-    if (!isNaN(buttonValue) || buttonValue === '.') {
-        if (isFirstNumber && !isSecondNumber && isOperation && !equalOperation) {
-            if (firstNumber === '0') {
-                firstNumber  = buttonValue;
-            } else {
-                if (buttonValue === '.' && firstNumber.includes('.')) {
-                    return;
-                }
-                firstNumber += buttonValue;
-            }
-            bottomElement.textContent = firstNumber;
-            topElement.textContent = firstNumber;
-            isFirstNumber = true;
-            isOperation = true;
-            isSecondNumber = false;
-        }
-        
-        if (!isFirstNumber && isSecondNumber && isOperation) {
-            if (secondNumber === '0') {
-                secondNumber = buttonValue
-            } else {
-                if (buttonValue === '.' && secondNumber.includes('.')) {
-                    return;
-                }
-                secondNumber += buttonValue;
-            }
-            bottomElement.textContent = secondNumber;
-            topElement.textContent = `${firstNumber}${currentOperation}${secondNumber}`;
-            isFirstNumber = false;
-            isOperation = false;
-            isSecondNumber = true;
-            equalOperation = true;
-        }
+
+function updateNumbers(number, input) {
+    return (number === '0' && input !== '.') ? input : number + input;
+};
+
+function handleNumberInput(buttonValue) {
+    if (isFirstNumber) {
+        if (buttonValue === '.' && firstNumber.includes('.')) {
+            return;
+        };
+        firstNumber = updateNumbers(firstNumber, buttonValue);
+        bottomElement.textContent = firstNumber;
+        topElement.textContent = firstNumber;
+    } else if (isSecondNumber) {
+        if (buttonValue === '.' && secondNumber.includes('.')) {
+            return;
+        };
+        secondNumber = updateNumbers(secondNumber, buttonValue);
+        bottomElement.textContent = secondNumber;
+        topElement.textContent = `${firstNumber}${currentOperation}${secondNumber}`;
+    };
+};
+
+function handleOperationInput(buttonValue) {
+    if (!isOperation && isSecondNumber && currentOperation) {
+        firstNumber = operate(currentOperation, parseFloat(firstNumber), parseFloat(secondNumber)).toString();
+    };
+    secondNumber = '';
+    currentOperation = buttonValue;
+    bottomElement.textContent = currentOperation;
+    topElement.textContent = `${firstNumber}${currentOperation}`;  
+    isFirstNumber = false;
+    isOperation = true; // go into operation mode
+    isSecondNumber = true; // expect next number/value
+};
+
+function handleEqualInput() {
+    if (secondNumber === '') {
+        secondNumber = '0';
+    };
+    firstNumber = operate(currentOperation, parseFloat(firstNumber), parseFloat(secondNumber)).toString();
+    if(firstNumber.length > 6) { // prevent text overflow
+        firstNumber = firstNumber.substring(0, 6);
+        bottomElement.textContent = firstNumber;
     } else {
-        if (mathOperations.includes(buttonValue)) {
-            if (!isOperation && isSecondNumber && currentOperation) {
-                if (firstNumber === '') {
-                    firstNumber = '0';
-                }
-                firstNumber = operate(currentOperation, parseFloat(firstNumber), parseFloat(secondNumber));
-                equalOperation = false;
-                isOperation = true;
-            }
+        bottomElement.textContent = firstNumber;
+    };
+    topElement.textContent = '';
+    resetForNewCalculation();  
+};
 
-            if (isOperation) {
-                currentOperation = buttonValue;
-                isFirstNumber = false;
-                isOperation = true;
-                isSecondNumber = true;
-                secondNumber = '';
-                topElement.textContent = `${firstNumber}${currentOperation}`;
-                bottomElement.textContent = currentOperation;
-            }
-        }
-        
-        if (buttonValue === '=' && equalOperation) {
-            topElement.textContent = '';
-            firstNumber = operate(currentOperation, parseFloat(firstNumber), parseFloat(secondNumber));
-            bottomElement.textContent = firstNumber;
-            
-            isFirstNumber = false;
-            isOperation = true;
-            isSecondNumber = false;
-            equalOperation = false;
-        }
+function resetForNewCalculation() {
+    isSecondNumber = false;
+    equalOperation = false;
+    isOperation = true; // Allow new operations
+};
 
-        if (buttonValue === 'AC') {
-            firstNumber = '';
-            secondNumber = '';
-            topElement.textContent = '';
-            bottomElement.textContent = '0';
-            
-            isFirstNumber = true;
-            isOperation = true;
-            isSecondNumber = false;
-        }
+function handleClearAll() {
+    firstNumber = '';
+    secondNumber = '';
+    bottomElement.textContent = '0';
+    topElement.textContent = '';
+    isFirstNumber = true;
+    isSecondNumber = false;
+    isOperation = true;
+    equalOperation = false; // Reset all states
+};
 
-        if (buttonValue === 'C') {
-            let temp = topElement.textContent;
-            temp = temp.slice(0, -1);
-            topElement.textContent = temp;
-            if (temp.includes(currentOperation)) {
-                let operationIndex = temp.indexOf(`${currentOperation}`);
-                firstNumber = temp.slice(0, operationIndex+1).trim();
-                secondNumber = temp.slice(operationIndex, temp.length).trim();
-            } else {
-                firstNumber = temp.slice(0, temp.length).trim();
-                secondNumber = '0';
-            }
-        }
+function handleClear() {
+    let temp = topElement.textContent.slice(0, -1);
+    topElement.textContent = temp;
+    if (temp.includes(currentOperation)) {
+        const operationIndex = temp.indexOf(currentOperation);
+        firstNumber = temp.slice(0, operationIndex).trim();
+        secondNumber = temp.slice(operationIndex + 1).trim();
+        bottomElement.textContent = secondNumber || '0'; // display "0" if there is an empty string
+    } else {
+        firstNumber = temp.trim() || '0';
+        secondNumber = '0';
+        bottomElement.textContent = firstNumber;
+    };
+};
 
-        if (buttonValue === '+/-') {
-            let temp = bottomElement.textContent;
-            if (!isOperation) {
-                return;
-            }
-            if (temp.includes('-')) {
-                firstNumber = temp.slice(1, temp.length);
-                bottomElement.textContent = firstNumber;
-            } else {
-                firstNumber = `-${temp}`;
-                bottomElement.textContent = firstNumber;
-            }
-        }
-    }
+function toggleSign() {
+    let temp = bottomElement.textContent;
+    if (!isOperation) {
+        return; // prevent sign toggle when not in operation mode
+    };
+    firstNumber = temp.includes('-') ? temp.slice(1) : `-${temp}`;
+    bottomElement.textContent = firstNumber;
+};
 
-})
+function handleButtonPress(e) {
+    e.preventDefault(); // prevent the default behavior of the event
+    const buttonValue = e.target.textContent.trim(); // parse input value
+    if (!isNaN(buttonValue) || buttonValue === '.') {
+        handleNumberInput(buttonValue);
+        equalOperation = true; // move to equal operation since we have numbers
+        isOperation = false; // reset operation state
+    } else if (mathOperations.includes(buttonValue)) {
+        handleOperationInput(buttonValue);
+    } else if (buttonValue === '=' && equalOperation) {
+        handleEqualInput();
+    } else if (buttonValue === 'AC') {
+        handleClearAll();
+    } else if (buttonValue === 'C') {
+        handleClear();
+    } else if (buttonValue === '+/-') {
+        toggleSign();
+    };
+};
 
-const add = function (a, b) {
-    return a + b;
-  };
-  
-const subtract = function (a, b) {
-    return a - b;
-  };
-
-const multiply = function (a, b) {
-    return a * b;
-}
-
-const divide = function (a, b) {
-    if (b === 0) {
-        if (a === 0) {
-            return 'NaN';
-        }
-        return 'Infinity';
-    }
-    return a / b;
-}
-
-const exponentiate = function (a, b) {
-    return a ** b;
-}
-
+const add = function (a, b) { return a + b; };  
+const subtract = function (a, b) { return a - b; };
+const multiply = function (a, b) { return a * b; };
+const divide = function (a, b) { return (b === 0 ? (a === 0 ? 'NaN' : 'Infinity') : a / b); };
+const exponentiate = function (a, b) { return a ** b; };
 const operate = function (operator, a, b) {
     switch(operator) {
-        case '+':
-            return add(a, b);
-        case '-':
-            return subtract(a, b);
-        case '*':
-            return multiply(a, b);
-        case '/':
-            return divide(a, b);
-        case '^':
-            return exponentiate(a, b);
+        case '+': return add(a, b);
+        case '-': return subtract(a, b);
+        case '*': return multiply(a, b);
+        case '/': return divide(a, b);
+        case '^': return exponentiate(a, b);
     }
 }
 
-module.exports = {
-    add,
-    subtract,
-    multiply,
-    divide,
-    exponentiate,
-    operate,
-  };
+keypad.addEventListener('click', handleButtonPress);
+keypad.addEventListener('touchend', handleButtonPress);

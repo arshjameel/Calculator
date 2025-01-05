@@ -3,40 +3,88 @@
     margin: 0;
     padding: 0;
     font-family: 'JetBrains Mono', monospace;
-    color: #231710;
+    color: black;
 }
 
 body {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	background-color: #b68121;
 	padding: 30px;
 	gap: 40px;
+    background-color: #b68121;
+}
+
+.window {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: 450px;
+    width: 350px;
+    border-radius: 10px;
+    border: 10px solid black;
+    background-color: black;
 }
 
 .screen {
-    border: 2px solid black;
-    width: 100%;
-    height: 100px;
-    padding: 10px;
-    box-sizing: border-box;
-
     display: flex;
     flex-direction: column;
     justify-content: space-around;
+    box-sizing: border-box;
+    height: 80px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid black;
+    background-color: #a4aaa9;
+    overflow: hidden; /* Hide overflow content */
 }
+
+
 
 .top {
     display: flex;
     justify-content: start;
+    height: 50%;
+    width: 100%;
     font-size: 24px;
 }
 
 .bottom {
     display: flex;
     justify-content: end;
-    font-size: 40px;
+    height: 50%;
+    width: 100%;
+    font-size: 24px;
+}
+
+.keypad {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+.key {
+    margin: 0 auto;
+    width: 82px;
+    height: 70px;
+    font-size: 24px;
+    border-radius: 10px;
+    border: 2px solid black;
+    background-color: #bca193;
+
+}
+
+#number {
+    background-color: #5e6b32;
+}
+
+#operations {
+    background-color: #b68121;
+}
+
+#clear {
+    background-color: #81392c;
 }
 
 .title {
@@ -46,33 +94,3 @@ body {
 .credit {
     font-size: 24px;
 }
-
-.window {
-    display: flex;
-    flex-direction: column;
-    border: 10px solid #231710;
-    height: 520px;
-    width: 420px;
-    box-sizing: border-box;
-    
-}
-
-.keypad {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
-    background-color: #bca193;
-}
-
-.key {
-    width: 100px;
-    height: 80px;
-    background-color: #bca193;
-    border: 2px solid black;
-    font-size: 24px;
-
-}
-
-/* #zero {
-    width: 200px;   
-} */
