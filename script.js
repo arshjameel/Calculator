@@ -1,6 +1,7 @@
 const keypad = document.querySelector('.keypad');
 const topElement = document.querySelector('.top');
 const bottomElement = document.querySelector('.bottom');
+const mathOperations = ['/', '*', '-', '+', '^'];
 
 let firstNumber = '0';
 let secondNumber = '0';
@@ -9,9 +10,6 @@ let isFirstNumber = true;
 let isSecondNumber = false;
 let equalOperation = false;
 let isOperation = true;
-
-const mathOperations = ['/', '*', '-', '+', '^'];
-
 
 function updateNumbers(number, input) {
     return (number === '0' && input !== '.') ? input : number + input;
@@ -95,13 +93,29 @@ function handleClear() {
     };
 };
 
-function toggleSign() {
-    let temp = bottomElement.textContent;
-    if (!isOperation) {
-        return; // prevent sign toggle when not in operation mode
-    };
-    firstNumber = temp.includes('-') ? temp.slice(1) : `-${temp}`;
-    bottomElement.textContent = firstNumber;
+function handlePi() {
+    const piValue = Math.PI.toFixed(6); // Limit to 6 decimal places
+    if (isFirstNumber) {
+        firstNumber = (firstNumber === '0' ? piValue : firstNumber*piValue);
+        bottomElement.textContent = firstNumber;
+        topElement.textContent = firstNumber;
+    } else if (isSecondNumber) {
+        secondNumber = (secondNumber === '0' ? piValue : secondNumber*piValue);
+        bottomElement.textContent = secondNumber;
+        topElement.textContent = `${firstNumber}${currentOperation}${secondNumber}`;
+    }
+    isOperation = false;
+    equalOperation = true;
+};
+
+function displayPi() {
+    document.getElementById('display').textContent += PI_SYMBOL;
+};
+  
+function evaluateExpression(expression) {
+    // Replace π symbol with its numerical value
+    let parsedExpression = expression.replace(PI_SYMBOL, PI_VALUE);
+    return eval(parsedExpression);
 };
 
 function handleButtonPress(e) {
@@ -119,8 +133,8 @@ function handleButtonPress(e) {
         handleClearAll();
     } else if (buttonValue === 'C') {
         handleClear();
-    } else if (buttonValue === '+/-') {
-        toggleSign();
+    } else if (buttonValue === 'π') {
+        handlePi();
     };
 };
 

@@ -80,7 +80,11 @@ body {
 }
 
 #operations {
-    background-color: #b68121;
+    background-color: #a77721;
+}
+
+#op2 {
+    background-color: #924e21;
 }
 
 #clear {
